@@ -17,18 +17,18 @@ const SETUP_DOCS = 'https://docs.nijam.dev/reporter/vitest/';
 /**
  * Minimal structural types for the bits of Vitest we read. Vitest duck-types reporter
  * objects (no named interface to implement) and its concrete types move between major
- * versions, so we model only what we use — keeping this compatible across Vitest 1–4.
+ * versions, so we model only what we use, keeping this compatible across Vitest 1-4.
  *
  * Two task representations exist:
- *  - **legacy task tree** (Vitest 1–2): `onFinished(files)` with nested `.tasks`.
- *  - **reported tasks API** (Vitest 3–4): `onTestRunEnd(testModules)` with `TestCase`s.
+ *  - **legacy task tree** (Vitest 1-2): `onFinished(files)` with nested `.tasks`.
+ *  - **reported tasks API** (Vitest 3-4): `onTestRunEnd(testModules)` with `TestCase`s.
  * We support both and guard against double-submission with `this.finished`.
  */
 interface CommonResult {
   errors?: Array<{ message?: string; stack?: string }>;
 }
 
-// ---- legacy task tree (Vitest 1–2) ----
+// ---- legacy task tree (Vitest 1-2) ----
 interface LegacyResult extends CommonResult {
   state?: string;
   duration?: number;
@@ -48,7 +48,7 @@ interface LegacyFile extends LegacyTask {
   filepath: string;
 }
 
-// ---- reported tasks API (Vitest 3–4) ----
+// ---- reported tasks API (Vitest 3-4) ----
 interface ReportedParent {
   type?: string;
   name?: string;
@@ -112,7 +112,7 @@ export default class NijamReporter {
   private buffer!: ExecutionBuffer;
 
   constructor(options: NijamReporterOptions) {
-    // Clone — never mutate the input options object Vitest owns.
+    // Clone, never mutate the input options object Vitest owns.
     this.options = { ...options };
     setSilent(this.options.silent ?? false);
     this.uploadSource = this.options.uploadSource !== false;
@@ -123,7 +123,7 @@ export default class NijamReporter {
 
     if (!this.options.apiKey || !this.options.projectId) {
       log.warn(
-        `missing ${!this.options.apiKey ? 'apiKey' : 'projectId'} — reporter disabled. See ${SETUP_DOCS}`,
+        `missing ${!this.options.apiKey ? 'apiKey' : 'projectId'}, reporter disabled. See ${SETUP_DOCS}`,
       );
       this.disabled = true;
       return;
@@ -155,7 +155,7 @@ export default class NijamReporter {
       this.runId = created.id;
       this.runUrl = created.url ?? null;
       log.info(
-        this.runUrl ? `run started — view it at ${this.runUrl}` : `run started (${created.id})`,
+        this.runUrl ? `run started, view it at ${this.runUrl}` : `run started (${created.id})`,
       );
     } catch (err) {
       this.disabled = true;
@@ -163,7 +163,7 @@ export default class NijamReporter {
     }
   }
 
-  /** Vitest 3–4: final hook with the reported-tasks API. */
+  /** Vitest 3-4: final hook with the reported-tasks API. */
   async onTestRunEnd(testModules: ReadonlyArray<ReportedModule> = [], errors: unknown[] = []): Promise<void> {
     if (this.disabled || this.finished || !this.runId) return;
     try {
@@ -174,7 +174,7 @@ export default class NijamReporter {
     }
   }
 
-  /** Vitest 1–2: final hook with the legacy task tree. */
+  /** Vitest 1-2: final hook with the legacy task tree. */
   async onFinished(files: LegacyFile[] = [], errors: unknown[] = []): Promise<void> {
     if (this.disabled || this.finished || !this.runId) return;
     try {
@@ -218,7 +218,7 @@ export default class NijamReporter {
     if (this.uploadSource) await this.uploadSources();
 
     if (!this.autoComplete) {
-      log.info('this job done — complete the run via your post-matrix step');
+      log.info('this job done, complete the run via your post-matrix step');
       if (this.runUrl) log.info(`view the run at ${this.runUrl}`);
       return;
     }
@@ -230,7 +230,7 @@ export default class NijamReporter {
     };
     await this.client.finalizeRun(this.runId, payload);
     log.info(
-      `run finalized (${stats.passed}/${stats.total} passed)${this.runUrl ? ` — view it at ${this.runUrl}` : ''}`,
+      `run finalized (${stats.passed}/${stats.total} passed)${this.runUrl ? `, view it at ${this.runUrl}` : ''}`,
     );
   }
 
@@ -239,7 +239,7 @@ export default class NijamReporter {
     await this.client.sendExecutions(this.runId, batch);
   }
 
-  /** Vitest 3–4 reported-tasks API → normalized tests. */
+  /** Vitest 3-4 reported-tasks API → normalized tests. */
   private collectReported(modules: ReadonlyArray<ReportedModule>): NormalizedTest[] {
     const out: NormalizedTest[] = [];
     for (const mod of modules) {
@@ -264,7 +264,7 @@ export default class NijamReporter {
     return out;
   }
 
-  /** Vitest 1–2 legacy task tree → normalized tests. */
+  /** Vitest 1-2 legacy task tree → normalized tests. */
   private collectLegacy(files: LegacyFile[]): NormalizedTest[] {
     const out: NormalizedTest[] = [];
     const walk = (tasks: LegacyTask[], filepath: string, ancestors: string[]): void => {

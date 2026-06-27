@@ -1,6 +1,6 @@
 # @nijam/vitest-reporter
 
-Vitest reporter for [Nijam](https://nijam.dev) — captures your test runs and ships them
+Vitest reporter for [Nijam](https://nijam.dev), captures your test runs and ships them
 to the Nijam dashboard so you can track what failed, why, and where (error log + failing
 line), across CI runs and over time.
 
@@ -17,7 +17,7 @@ npm install -D @nijam/vitest-reporter
 ## Configure
 
 Add the reporter to your `vitest.config.ts`. Pass the API key via an environment variable
-(it's a secret — keep it out of source control):
+(it's a secret, keep it out of source control):
 
 ```ts
 import { defineConfig } from 'vitest/config';
@@ -30,7 +30,7 @@ export default defineConfig({
       'default',
       new NijamReporter({
         apiKey: process.env.NIJAM_API_KEY, // required
-        projectId: '<project-uuid>', // required — from the dashboard
+        projectId: '<project-uuid>', // required, from the dashboard
       }),
     ],
     // Capture the failing line for each test (off by default in Vitest).
@@ -48,10 +48,10 @@ npx vitest run
 
 | option         | type    | default                 | what it does                                                   |
 | -------------- | ------- | ----------------------- | ------------------------------------------------------------- |
-| `apiKey`       | string  | —                       | Ingest API key (required).                                     |
-| `projectId`    | string  | —                       | Project UUID (required).                                       |
+| `apiKey`       | string  |,                       | Ingest API key (required).                                     |
+| `projectId`    | string  |,                       | Project UUID (required).                                       |
 | `apiUrl`       | string  | `https://api.nijam.dev` | API base URL.                                                  |
-| `environment`  | string  | —                       | Free-form environment tag (e.g. `staging`).                   |
+| `environment`  | string  |,                       | Free-form environment tag (e.g. `staging`).                   |
 | `uploadSource` | boolean | `true`                  | Upload each test file's source so the dashboard can show it.   |
 | `autoComplete` | boolean | `true`                  | Finalize the run when the process ends. `false` for fan-out.   |
 | `silent`       | boolean | `false`                 | Suppress `[nijam]` log lines.                                  |
@@ -59,7 +59,7 @@ npx vitest run
 `apiKey` and `apiUrl` also read from `NIJAM_API_KEY` / `NIJAM_API_URL`; `autoComplete` is
 forced off by `NIJAM_AUTO_COMPLETE=false`.
 
-If `apiKey` or `projectId` is missing, the reporter disables itself with one warning —
+If `apiKey` or `projectId` is missing, the reporter disables itself with one warning -
 your tests run exactly as before.
 
 > **Failing line:** Vitest only records each test's source location when

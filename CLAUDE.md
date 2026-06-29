@@ -34,6 +34,7 @@ src/
   types.ts      # NijamReporterOptions + payload shapes (no ArtifactKind)
   log.ts        # [nijam]-prefixed warn/info; identical to pw-reporter
   index.ts      # public entry, re-exports the reporter + types
+  cli.ts        # `nijam-vitest` bin: fetch-failed (re-run only failures)
 ```
 
 ## Public API (design backward from this)
@@ -61,6 +62,7 @@ Options: `apiKey` (req), `projectId` (req), `apiUrl?`, `silent?`, `environment?`
   `retry`=`result.retryCount`. Status: pass→passed, fail→failed, skip/todo→skipped.
   Flaky = passed with `retryCount > 0`.
 - **HTTP**: Bearer `apiKey`, 30s `AbortController` timeout, no retries, `log.warn` on error.
+- **Re-run only failures** (`cli.ts`, `nijam-vitest` bin): `nijam-vitest fetch-failed` GETs `/v1/projects/:id/failed-tests` (ingest-key authed, identifiers only) and prints the failing spec **files**; Vitest has no run-by-line, so exact filtering pairs the files with a test-name regex exported as `NIJAM_TEST_NAME_PATTERN` (via `--export-env`): `npx vitest run $(cat failed.txt) -t "$NIJAM_TEST_NAME_PATTERN"`. `--export-env "$GITHUB_ENV"` also writes `NIJAM_RUN_GROUP`/`NIJAM_RUN_ATTEMPT`/`NIJAM_RERUN` so the retry **clubs under the original run** and is tagged `partialRerun`. `ci.ts` honors `NIJAM_RUN_GROUP`/`NIJAM_RUN_ATTEMPT`; `reporter.ts` sends `partialRerun` from `NIJAM_RERUN`. CI-safe: a fetch failure emits nothing + exits 0 (caller's `[ -s failed.txt ]` guard runs the full suite), only bad usage exits non-zero. Keep `cli.ts` aligned with pw-reporter's (file/pattern split is the one Vitest-specific difference).
 
 ## Guard rails, do NOT
 - ❌ **Throw from a reporter hook**, wrap every async block in try/catch, `log.warn`,

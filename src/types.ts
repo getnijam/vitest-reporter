@@ -38,6 +38,8 @@ export type RunContext = {
   repository?: string;
   authorEmail?: string;
   authorName?: string;
+  /** Who triggered the CI run (actor login, may be a bot), distinct from the commit author. */
+  triggeredBy?: string;
 };
 
 /** Payload sent to POST /v1/runs to open a run. */

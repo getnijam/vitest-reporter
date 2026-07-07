@@ -69,7 +69,7 @@ interface ReportedModule {
 }
 
 interface VitestContext {
-  config?: { root?: string };
+  config?: { root?: string; shard?: { index: number; count: number } };
 }
 
 /** Framework-neutral test record both extraction paths normalize into. */
@@ -141,11 +141,16 @@ export default class NijamReporter {
       this.gitRoot = detectGitRoot() ?? '';
       const context = detectRunContext(this.options);
       this.startedAt = new Date().toISOString();
+      // `vitest --shard=i/N` sets config.shard; all shards of one CI run club into a
+      // single Nijam run server-side (same as Playwright's --shard).
+      const shard = ctx.config?.shard;
       const created = await this.client.createRun({
         ...context,
         projectId: this.options.projectId,
         environment: this.options.environment,
         startedAt: this.startedAt,
+        shardIndex: shard?.index,
+        shardTotal: shard?.count,
         // Set by `nijam-vitest fetch-failed` when this is a failed-only retry, so the
         // dashboard tags it "re-run of failed".
         partialRerun: isRerun(),

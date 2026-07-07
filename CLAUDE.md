@@ -80,5 +80,5 @@ Options: `apiKey` (req), `projectId` (req), `apiUrl?`, `silent?`, `environment?`
 
 ## Build & publish
 - `npm install` · `npm run build` (tsup) · `npm run typecheck` · `npm run dev` (watch).
-- Versions: `0.1.0-alpha.N` until launch, then `0.1.0`; semver after. Smoke-test by
-  `npm link` into a sample Vitest project and watching behavior.
+- **Never hand-edit this package's `version` in `package.json`.** The GitHub build/release workflow auto-increments and publishes it; a manual bump collides with the release. Leave the version field untouched in every change. (Consumers depending on this reporter, e.g. web-app, still reference it normally, that dep range is fine to keep, just don't hand-bump *this* package's own version.)
+- Smoke-test by `npm link` into a sample Vitest project and watching behavior.

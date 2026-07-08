@@ -47,6 +47,9 @@ export type CreateRunPayload = RunContext & {
   projectId: string;
   environment?: string;
   startedAt: string;
+  /** Vitest shard (1-based) + total, when running `--shard`. Clubs shards into one run. */
+  shardIndex?: number;
+  shardTotal?: number;
   /** True when this run re-ran only the previous attempt's failed tests (NIJAM_RERUN). */
   partialRerun?: boolean;
 };

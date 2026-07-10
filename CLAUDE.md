@@ -52,6 +52,13 @@ Options: `apiKey` (req), `projectId` (req), `apiUrl?`, `silent?`, `environment?`
   structural types), no hard `vitest` type import. Keeps it working on Vitest 1/2/3.
 - `onInit(ctx)` → read `ctx.config.root`, detect CI/git, `POST /v1/runs`, store `runId`;
   on failure log + no-op the run.
+- **Sharding** (`vitest --shard=i/N`): read `ctx.config.shard` (`{ index, count }`, 1-based)
+  in `onInit` and send `shardIndex`/`shardTotal` on `POST /v1/runs`; the server keys on
+  `ciRunId#attempt` and **clubs all shards into one run**, stamps each execution's shard, and
+  finalizes only once every shard reports (same wire shape + server behavior as pw-reporter).
+  Native `--shard` **only**: this reporter has no `NIJAM_SHARD_INDEX`/`NIJAM_SHARD_TOTAL`
+  manual-fan-out override (that is Playwright-only); an un-sharded matrix uses `autoComplete:false`
+  + a post-matrix complete instead.
 - `onFinished(files, errors)` → walk the file tree into a flat list of tests (recurse
   `type==='suite'`, collect `type==='test'|'custom'`), build one execution per test, drain
   the buffer, upload sources, then `PATCH /v1/runs/:id` to finalize (unless `autoComplete`

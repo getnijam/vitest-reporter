@@ -72,6 +72,30 @@ Run context (commit, branch, PR number, CI provider/run URL, commit author) is d
 automatically from GitHub Actions, GitLab CI, CircleCI, Bitbucket Pipelines, or generic
 `GIT_*` env vars, falling back to `git`. No configuration needed.
 
+## Sharding
+
+Running `vitest --shard=<i>/<N>` works out of the box. The reporter reads Vitest's
+`config.shard`, and every shard of the same CI run **clubs into one Nijam run**: each
+test execution is tagged with the 1-based **shard index** it ran on (`i` of `N`), and the
+run finalizes only once all `N` shards have reported. Nothing to configure.
+
+```yaml
+# GitHub Actions
+strategy:
+  matrix:
+    shard: [1, 2, 3, 4]
+steps:
+  - run: npx vitest run --shard=${{ matrix.shard }}/4
+```
+
+All shards must share the same CI run id (automatic on CI) so they club together.
+
+Splitting test **files** across CI jobs _without_ `--shard`? Vitest reports no shard info
+then, so the run's total is unknown up front: set `autoComplete: false` (or
+`NIJAM_AUTO_COMPLETE=false`) on every job so none finalizes early, then finalize once from
+a single post-matrix step. Unlike the Playwright reporter, this reporter has no
+`NIJAM_SHARD_INDEX` / `NIJAM_SHARD_TOTAL` override, it detects only native `--shard`.
+
 ## Guarantees
 
 This reporter **never breaks your test run.** Every hook is fail-soft: a network error, a
